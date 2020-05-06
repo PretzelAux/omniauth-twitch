@@ -88,17 +88,5 @@ module OmniAuth
         end
       end
     end
-
-    def deep_symbolize(options)
-      hash = {}
-      options.each do |key, value|
-        if key.downcase == "client-id"
-          hash['Client-Id'] = value
-        else
-          hash[key.to_sym] = value.is_a?(Hash) ? deep_symbolize(value) : value
-        end
-      end
-      hash
-    end
   end
 end
