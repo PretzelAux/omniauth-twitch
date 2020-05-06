@@ -10,7 +10,12 @@ module OmniAuth
       option :client_options, {
         site: "https://id.twitch.tv",
         authorize_url: "/oauth2/authorize",
-        token_url: "/oauth2/token"
+        token_url: "/oauth2/token",
+        connection_opts: {
+          headers: {
+            client_id: ENV['TWITCH_CLIENT_ID']
+          }
+        }
       }
 
       option :access_token_options, {
@@ -19,6 +24,10 @@ module OmniAuth
       }
 
       option :authorize_options, [:scope]
+
+      option :token_params, {
+        client_secret: ENV['TWITCH_SECRET']
+      }
 
       credentials do
         hash = { "token" => access_token.token }
@@ -58,10 +67,6 @@ module OmniAuth
       def build_access_token
         super.tap do |token|
           token.options.merge!(access_token_options)
-          puts "token: #{token.to_json}"
-          puts "token.options: #{token.options.to_json}"
-          puts "access_token_options: #{access_token_options.to_json}"
-          # token.options.merge!(headers: {'Client-ID' => ENV['TWITCH_CLIENT_ID']})
         end
       end
 
@@ -82,6 +87,18 @@ module OmniAuth
           params[:scope] = params[:scope] || DEFAULT_SCOPE
         end
       end
+    end
+
+    def deep_symbolize(options)
+      hash = {}
+      options.each do |key, value|
+        if key.downcase == "client-id"
+          hash['Client-Id'] = value
+        else
+          hash[key.to_sym] = value.is_a?(Hash) ? deep_symbolize(value) : value
+        end
+      end
+      hash
     end
   end
 end
