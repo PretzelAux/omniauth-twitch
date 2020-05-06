@@ -58,6 +58,9 @@ module OmniAuth
       def build_access_token
         super.tap do |token|
           token.options.merge!(access_token_options)
+          puts token.to_json
+          token.options.merge!(headers: {'Client-ID' => ENV['TWITCH_CLIENT_ID']})
+          puts token.to_json
         end
       end
 
